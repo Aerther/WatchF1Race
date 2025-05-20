@@ -1,0 +1,45 @@
+/* Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+
+    display: grid;
+    grid-template-columns: 20% 1fr;
+    grid-template-rows: 100px 1fr 100px;
+
+    grid-template-areas: 
+    "header header"
+    "nav main"
+    "footer footer";
+}
+
+/* Content areas */
+header {
+    grid-area: header;
+    background-color: red;
+}
+
+nav {
+    grid-area: nav;
+    background-color: white;
+}
+
+main {
+    grid-area: main;
+    background-color: green;
+}
+
+footer {
+    grid-area: footer;
+    background-color: yellow;
+}
+
+a {
+    text-decoration: none;
+}

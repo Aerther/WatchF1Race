@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="src/styles/styles.css">
+    <script src="src/js/script.js" defer></script>
+
+    <title>Racing One</title>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>Welcome to Racing One</h1>
+    </header>
+
+    <!-- Nav -->
+    <nav>
+        <ul>
+            <li><button>See Races</button></li>
+            <li></li>
+        </ul>
+    </nav>
+
+    <!-- Main -->
+    <main>
+        <!-- See Races Content -->
+         <section>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Driver</th>
+                        <th>Gap to 1°</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <th>1</th>
+                        <th>Max Verstappen</th>
+                        <th>00:00</th>
+                    </tr>
+
+                    <tr>
+                        <th>2</th>
+                        <th>Lewis Hamilton</th>
+                        <th>10:30</th>
+                    </tr>
+
+                    <tr>
+                        <th>3</th>
+                        <th>Kimi</th>
+                        <th>20:00</th>
+                    </tr>
+                </tbody>
+            </table>
+
+            <form id="formSeeRaces">
+                <label for="circuit">Circuit Name:</label>
+                <select name="circuit" id="circuit">
+                    <option value="Spa-Francorchamps">Spa (Belgium)</option>
+                    <option value="Interlagos">Interlagos (Brazil)</option>
+                    <option value="Sakhir">Sakhir (Bahrain)</option>
+                </select>
+
+                <label for="typeOfSession">Type Of Race:</label>
+                <select name="typeOfSession" id="typeOfSession">
+                    <option value="Race">Race</option>
+                    <option value="Qualifying">Qualifying</option>
+                </select>
+
+                <label for="year">Year:</label>
+                <input type="number" name="year" id="year">
+
+                <input type="submit" value="Load" id="btnSeeRaces">
+            </form>
+         </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+
+    </footer>
+</body>
+</html>

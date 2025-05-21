@@ -31,28 +31,11 @@
                     <tr>
                         <th>Position</th>
                         <th>Driver</th>
-                        <th>Gap to 1°</th>
+                        <th>Interval</th>
                     </tr>
                 </thead>
 
-                <tbody>
-                    <tr>
-                        <th>1</th>
-                        <th>Max Verstappen</th>
-                        <th>00:00</th>
-                    </tr>
-
-                    <tr>
-                        <th>2</th>
-                        <th>Lewis Hamilton</th>
-                        <th>10:30</th>
-                    </tr>
-
-                    <tr>
-                        <th>3</th>
-                        <th>Kimi</th>
-                        <th>20:00</th>
-                    </tr>
+                <tbody id="tableBodySeeRaces">
                 </tbody>
             </table>
 
@@ -71,7 +54,7 @@
                 </select>
 
                 <label for="year">Year:</label>
-                <input type="number" name="year" id="year">
+                <input type="number" name="year" id="year" min="2023" max="2025">
 
                 <input type="submit" value="Load" id="btnSeeRaces">
             </form>

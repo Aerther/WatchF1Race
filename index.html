@@ -16,54 +16,58 @@
 
     <!-- Nav -->
     <nav>
-        <ul>
-            <li><button>See Races</button></li>
-            <li></li>
-        </ul>
+        <form id="formSeeRaces">
+            <label for="circuit">Circuit Name:</label>
+            <select name="circuit" id="circuit" required>
+                <option value="Spa-Francorchamps">Spa (Belgium)</option>
+                <option value="Interlagos">Interlagos (Brazil)</option>
+                <option value="Sakhir">Sakhir (Bahrain)</option>
+            </select>
+
+            <label for="typeOfSession">Type Of Race:</label>
+            <select name="typeOfSession" id="typeOfSession" required>
+                <option value="Race">Race</option>
+                <option value="Sprint">Sprint</option>
+            </select>
+
+            <label for="year">Year:</label>
+            <input type="number" name="year" id="year" min="2023" max="2025" required>
+
+            <input type="submit" value="Load" id="btnSeeRaces" name="load-race">
+            <input type="submit" value="Load Latest" id="btnSeeLatest" name="load-latest" formnovalidate>
+        </form>
     </nav>
 
     <!-- Main -->
     <main>
         <!-- See Races Content -->
-         <section>
+         <section class="full-frame">
             <table>
                 <thead>
                     <tr>
                         <th>Position</th>
                         <th>Driver</th>
+                        <th>Team</th>
+                        <th>Gap</th>
                         <th>Interval</th>
+                        <th>Sector 1</th>
+                        <th>Sector 2</th>
+                        <th>Sector 3</th>
                     </tr>
                 </thead>
 
                 <tbody id="tableBodySeeRaces">
                 </tbody>
             </table>
-
-            <form id="formSeeRaces">
-                <label for="circuit">Circuit Name:</label>
-                <select name="circuit" id="circuit">
-                    <option value="Spa-Francorchamps">Spa (Belgium)</option>
-                    <option value="Interlagos">Interlagos (Brazil)</option>
-                    <option value="Sakhir">Sakhir (Bahrain)</option>
-                </select>
-
-                <label for="typeOfSession">Type Of Race:</label>
-                <select name="typeOfSession" id="typeOfSession">
-                    <option value="Race">Race</option>
-                    <option value="Qualifying">Qualifying</option>
-                </select>
-
-                <label for="year">Year:</label>
-                <input type="number" name="year" id="year" min="2023" max="2025">
-
-                <input type="submit" value="Load" id="btnSeeRaces">
-            </form>
          </section>
     </main>
 
     <!-- Footer -->
     <footer>
-
+        <h2 id="h2Track">Track:</h2>
+        <h2 id="h2Year">Year:</h2>
+        <button id="startRace">Start Race</button>
+        <button id="stopRace">Stop Race</button>
     </footer>
 </body>
 </html>

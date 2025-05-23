@@ -1,8 +1,13 @@
 let formSeeRaces = document.getElementById("formSeeRaces");
+let dataSelected = document.getElementById("dataSelected");
 
 let dataCircuit;
 let dataDrivers;
-let dataQuali;
+let dataPositions;
+let dataIntervals;
+let dataLaps;
+
+let lastDate;
 
 document.addEventListener("DOMContentLoaded", function() {
     let firstFetchQuery = `https://api.openf1.org/v1/sessions?circuit_short_name=Interlagos&session_name=Race&year=2024`;
@@ -16,55 +21,118 @@ formSeeRaces.addEventListener("submit", function(e) {
     let data = Object.fromEntries(formData.entries());
 
     let firstFetchQuery;
-    if(e.submitter.name === "load-race") {
+    /*if(e.submitter.name === "load-race") {
         firstFetchQuery = `https://api.openf1.org/v1/sessions?circuit_short_name=${data["circuit"]}&session_name=${data["typeOfSession"]}&year=${data["year"]}`;
         loadCircuit(firstFetchQuery);
     } else {
         firstFetchQuery = `https://api.openf1.org/v1/sessions?session_key=latest&session_name=Race`;
         loadCircuit(firstFetchQuery);
-    }
+    }*/
+
+    firstFetchQuery = `https://api.openf1.org/v1/sessions?circuit_short_name=${data["circuit"]}&session_name=${data["typeOfSession"]}&year=${data["year"]}`;
+    loadCircuit(firstFetchQuery);
 });
 
 async function loadCircuit(firstFetchQuery) {
     try {
+        dataSelected.textContent = "Loading data...";
+
         const startTime = performance.now();
         
         let response = await fetch(firstFetchQuery);
         dataCircuit = (await response.json())[0];
 
-        let response2 = await fetch(`https://api.openf1.org/v1/drivers?session_key=${dataCircuit["session_key"]}`);
-        dataDrivers = await response2.json();
+        if(dataCircuit == undefined) {
+            alert("This combination doesn't exist");
+            dataSelected.textContent = "Data combination didn't exist";
+            return;
+        };
 
-        let response3 = await fetch(`https://api.openf1.org/v1/position?session_key=${dataCircuit["session_key"]}`);
-        dataQuali = await response3.json();
+        lastDate = dataCircuit["date_start"];
+
+        [dataDrivers, dataPositions, dataIntervals, dataLaps] = await Promise.all([
+            fetch(`https://api.openf1.org/v1/drivers?session_key=${dataCircuit["session_key"]}`).then(res => res.json()),
+            fetch(`https://api.openf1.org/v1/position?session_key=${dataCircuit["session_key"]}`).then(res => res.json()),
+            fetch(`https://api.openf1.org/v1/intervals?session_key=${dataCircuit["session_key"]}`).then(res => res.json()),
+            fetch(`https://api.openf1.org/v1/laps?session_key=${dataCircuit["session_key"]}`).then(res => res.json()),
+        ]);
 
         updateTrackAndYearElements(dataCircuit);
 
-        let lastPositions = getFirstPositions(dataQuali).sort(function(a, b) {return a.position - b.position});
+        let lastPositions = getFirstPositions(dataPositions).sort(function(a, b) {return a.position - b.position});
 
         addDriversToTable(dataDrivers, lastPositions);
 
         const endTime = performance.now();
 
-        console.log(endTime-startTime)
+        console.log(endTime-startTime);
+
+        dataSelected.textContent = "Data has been loaded";
+
+        setInterval(() => {
+            updateTable()
+        }, 3000);
     } catch(e) {
         console.log(e);
     };
 };
 
-function getFirstPositions(dataQuali) {
-    let latestPositions = dataQuali.reduce((acc, cur) => {
-        let driver = cur["driver_number"];
-        let currentTime = new Date(cur["date"]);
+function updateTable() {
+    let firstPositions = getFirstPositions(dataPositions).sort((a, b) => a.position - b.position);
 
-        if(!acc[driver] || new Date(acc[driver].date) > currentTime) {
-            acc[driver] = cur;
+    dataDrivers.sort((a, b) => {
+    const posA = firstPositions.find(p => p.driver_number === a.driver_number)?.position || Infinity;
+    const posB = firstPositions.find(p => p.driver_number === b.driver_number)?.position || Infinity;
+    return posA - posB;
+    });
+
+    let tableBody = document.getElementById("tableBodySeeRaces");
+    tableBody.textContent = "";
+
+    dataDrivers.forEach((driver, index) => {
+        let trElement = document.createElement("tr");
+
+        trElement.textContent = "";
+        trElement.style.backgroundColor = "#" + driver["team_colour"];
+
+        let cells = [
+            index+1,
+            driver["broadcast_name"].slice(2),
+            driver["team_name"],
+            "0.000",
+            "0.000",
+            "00.000",
+            "00.000",
+            "00.000",
+            "0"
+        ].map(createCell);
+        
+        cells.forEach(cell => trElement.appendChild(cell));
+
+        tableBody.appendChild(trElement);
+    });
+};
+
+function getFirstPositions(dataPositions) {
+    let firstPositions = {};
+    let removeItems = {};
+
+    dataPositions.forEach((position, index) => {
+        let driver = position["driver_number"];
+        let currentTime = new Date(position["date"]);
+
+        if(firstPositions[driver] === undefined || new Date(firstPositions[driver]["date"]) > currentTime) {
+            removeItems[driver] = index;
+            firstPositions[driver] = position;
+            return;
         };
+    });
+    
+    Object.values(removeItems).sort((a, b) => b - a).forEach(i => {
+        dataPositions.splice(i, 1);
+    });
 
-        return acc;
-    }, {});
-
-    return Object.values(latestPositions);
+    return Object.values(firstPositions);
 };
 
 function updateTrackAndYearElements(dataCircuit) {
@@ -75,50 +143,40 @@ function updateTrackAndYearElements(dataCircuit) {
     h2Year.textContent = "Year: " + dataCircuit["year"];
 };
 
-function addDriversToTable(dataDrivers, dataQuali) {
+function addDriversToTable(dataDrivers, dataPositions) {
     let tableBodySeeRaces = document.getElementById("tableBodySeeRaces");
     let dataDriver;
 
     tableBodySeeRaces.textContent = "";
 
-    Object.keys(dataQuali).forEach((key, index) => {
-        dataDriver = Object.values(dataDrivers).find(driver => driver["driver_number"] === dataQuali[key]["driver_number"]);
+    Object.keys(dataPositions).forEach((key, index) => {
+        dataDriver = Object.values(dataDrivers).find(driver => driver["driver_number"] === dataPositions[key]["driver_number"]);
 
         let trElement = document.createElement("tr");
 
-        let thPosition = document.createElement("th");
-        thPosition.textContent = index+1;
+        trElement.style.backgroundColor = "#" + dataDriver["team_colour"];
 
-        let thName = document.createElement("th");
-        thName.textContent = dataDriver["broadcast_name"].slice(2);
+        let cells = [
+            index+1,
+            dataDriver["broadcast_name"].slice(2),
+            dataDriver["team_name"],
+            "0.000",
+            "0.000",
+            "00.000",
+            "00.000",
+            "00.000",
+            "0"
+        ].map(createCell);
 
-        let thTeamName = document.createElement("th");
-        thTeamName.textContent = dataDriver["team_name"];
-
-        let thGapToFront = document.createElement("th");
-        thGapToFront.textContent = "0.000";
-
-        let thGapToFirst = document.createElement("th");
-        thGapToFirst.textContent = "0.000";
-
-        let thSector1 = document.createElement("th");
-        thSector1.textContent = "00.000";
-
-        let thSector2 = document.createElement("th");
-        thSector2.textContent = "00.000";
-
-        let thSector3 = document.createElement("th");
-        thSector3.textContent = "00.000";
-
-        trElement.appendChild(thPosition);
-        trElement.appendChild(thName);
-        trElement.appendChild(thTeamName);
-        trElement.appendChild(thGapToFront);
-        trElement.appendChild(thGapToFirst);
-        trElement.appendChild(thSector1);
-        trElement.appendChild(thSector2);
-        trElement.appendChild(thSector3);
+        cells.forEach(cell => trElement.appendChild(cell));
 
         tableBodySeeRaces.appendChild(trElement);
     });
+};
+
+function createCell(text) {
+    let thElement = document.createElement("th");
+    thElement.textContent = text;
+
+    return thElement;
 };

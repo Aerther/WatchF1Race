@@ -15,7 +15,7 @@
     </header>
 
     <!-- Nav -->
-    <nav>
+    <aside>
         <form id="formSeeRaces">
             <label for="circuit">Circuit Name:</label>
             <select name="circuit" id="circuit" required>
@@ -36,7 +36,7 @@
             <input type="submit" value="Load" id="btnSeeRaces" name="load-race">
             <input type="submit" value="Load Latest" id="btnSeeLatest" name="load-latest" formnovalidate>
         </form>
-    </nav>
+    </aside>
 
     <!-- Main -->
     <main>
@@ -53,6 +53,7 @@
                         <th>Sector 1</th>
                         <th>Sector 2</th>
                         <th>Sector 3</th>
+                        <th>Pit Stop</th>
                     </tr>
                 </thead>
 
@@ -68,6 +69,7 @@
         <h2 id="h2Year">Year:</h2>
         <button id="startRace">Start Race</button>
         <button id="stopRace">Stop Race</button>
+        <p id="dataSelected">Data hasn't been selected</p>
     </footer>
 </body>
 </html>

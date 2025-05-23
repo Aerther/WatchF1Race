@@ -8,7 +8,11 @@ let dataIntervals;
 let dataLaps;
 
 let lastDate;
+let interval;
 
+document.getElementById("stopRace").addEventListener("click", () =>{
+    clearInterval(interval);
+});
 document.addEventListener("DOMContentLoaded", function() {
     let firstFetchQuery = `https://api.openf1.org/v1/sessions?circuit_short_name=Interlagos&session_name=Race&year=2024`;
     loadCircuit(firstFetchQuery);
@@ -21,6 +25,7 @@ formSeeRaces.addEventListener("submit", function(e) {
     let data = Object.fromEntries(formData.entries());
 
     let firstFetchQuery;
+    clearInterval(interval)
     /*if(e.submitter.name === "load-race") {
         firstFetchQuery = `https://api.openf1.org/v1/sessions?circuit_short_name=${data["circuit"]}&session_name=${data["typeOfSession"]}&year=${data["year"]}`;
         loadCircuit(firstFetchQuery);
@@ -48,7 +53,7 @@ async function loadCircuit(firstFetchQuery) {
             return;
         };
 
-        lastDate = dataCircuit["date_start"];
+        lastDate = new Date(dataCircuit["date_start"]);
 
         [dataDrivers, dataPositions, dataIntervals, dataLaps] = await Promise.all([
             fetch(`https://api.openf1.org/v1/drivers?session_key=${dataCircuit["session_key"]}`).then(res => res.json()),
@@ -69,9 +74,10 @@ async function loadCircuit(firstFetchQuery) {
 
         dataSelected.textContent = "Data has been loaded";
 
-        setInterval(() => {
-            updateTable()
-        }, 3000);
+        interval = setInterval(() => {
+            lastDate.setSeconds(lastDate.getSeconds() + 60);
+            updateTable();
+        }, 1000);
     } catch(e) {
         console.log(e);
     };
@@ -116,19 +122,33 @@ function updateTable() {
 function getFirstPositions(dataPositions) {
     let firstPositions = {};
     let removeItems = {};
+    let newDataPositions = {};
+
+    console.log(lastDate)
 
     dataPositions.forEach((position, index) => {
         let driver = position["driver_number"];
         let currentTime = new Date(position["date"]);
 
-        if(firstPositions[driver] === undefined || new Date(firstPositions[driver]["date"]) > currentTime) {
+        if(lastDate < currentTime) return;
+
+        if((firstPositions[driver] === undefined || new Date(firstPositions[driver]["date"]) > currentTime)) {
             removeItems[driver] = index;
             firstPositions[driver] = position;
-            return;
         };
+
+        if (!newDataPositions[driver]) {
+                newDataPositions[driver] = [];
+        };
+
+        newDataPositions[driver].push(position);
     });
     
-    Object.values(removeItems).sort((a, b) => b - a).forEach(i => {
+    console.log(removeItems)
+    removeItems = (Object.entries(removeItems).filter(([key, value]) => (newDataPositions[key].length > 1))).map(([, index]) => index);
+    console.log(removeItems)
+
+    removeItems.sort((a, b) => b - a).forEach(i => {
         dataPositions.splice(i, 1);
     });
 
